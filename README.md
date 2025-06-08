@@ -59,15 +59,9 @@ Esta aplicación consume datos desde la API pública **[REST Countries v3.1](htt
 
 ### 💻 Versión de escritorio
 
-![Versión de escritorio](./screenshots/Image_CountriesApp_Desktop.png)
+![Desktop](./screenshots/Image_CountriesApp_Desktop.png)
 
-### 📱 Versión móvil
-
-![Versión móvil](./screenshots/Image_CountriesApp_Mobile.png)
-
-### 📱 Versión tablet
-
-![Versión tablet](./screenshots/Image_CountriesApp_Tablet.png)
+🔗 [Ver demo en línea](https://myprojectcountriesapp-vue.netlify.app/)
 
 ---
 
