@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center my-24">
+  <div class="text-center my-20 mb-12">
     <h1 class="text-4xl font-bold tracking-widest text-sky-700">
       Countries App
     </h1>
@@ -8,5 +8,3 @@
 </template>
 
 <script></script>
-
-<style lang="scss" scoped></style>

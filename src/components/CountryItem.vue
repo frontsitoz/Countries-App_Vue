@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { defineProps } from "vue";
 import type { Country } from "../models/country.model.ts";
-
+import { defineProps } from "vue";
 interface Props {
   country: Country;
 }
@@ -20,12 +19,9 @@ defineProps<Props>();
   <h4 class="text-xl font-bold text-gray-500">{{ country.name.common }}</h4>
   <p class="text-sm text-gray-400">
     Capital:
-    <span
-      class="font-bold"
-      v-for="(capital, index) in country.capital"
-      :key="capital"
-    >
-      {{ capital }} <span v-if="index < country.capital.length - 1">, </span>
+    <span class="font-bold" v-for="capital in country.capital">
+      {{ capital }}
+      <template>, </template>
     </span>
   </p>
 

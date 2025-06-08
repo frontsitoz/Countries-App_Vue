@@ -3,6 +3,8 @@ import { defineProps } from "vue";
 import type { Country } from "../models/country.model.ts";
 import CountryItem from "./CountryItem.vue";
 
+//* Aquí se define la interfaz Props que va a recibir el componente CountryList
+// Esta interfaz define que el componente CountryList va a recibir una propiedad llamada countries que es un array de objetos Country
 interface Props {
   countries: Country[];
 }
