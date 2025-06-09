@@ -6,22 +6,30 @@ import CountryList from "./components/CountryList.vue";
 import axiosClient from "./utils/axios.ts";
 import type { Country } from "./models/country.model.ts";
 
-const countries = ref<Country[]>([]); // Lista de países obtenida de la API
-const search = ref(""); // Texto de búsqueda ingresado por el usuario
-const filteredCountries = ref<Country[]>([]); // Países filtrados según la búsqueda
-const page = ref(1); // Página actual para la paginación
-const itemsPerPage = ref(12); // Número de países por página
-const paginatedCountries = ref<Country[]>([]); // Países que se mostrarán en la página actual
-const totalItems = ref(0); // Total de países para calcular la paginación
+const countries = ref<Country[]>([]);
+const search = ref("");
+const filteredCountries = ref<Country[]>([]);
+const page = ref(1);
+const itemsPerPage = ref(12);
+const paginatedCountries = ref<Country[]>([]);
+const totalItems = ref(0);
 
-//*Esta es una función asíncrona que se va a encargar de hacer la petición a la API de países
+const isDark = ref(false);
+
+const toggleDark = () => {
+  isDark.value = !isDark.value;
+  if (isDark.value) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+};
 
 const fetchCountries = async () => {
   try {
     const response = await axiosClient.get(
       "/all?fields=name,flags,capital,population,region"
     );
-
     countries.value = response.data;
     console.log(response.data);
   } catch (error) {
@@ -29,29 +37,27 @@ const fetchCountries = async () => {
   }
 };
 
-//* Esta función se encarga de filtrar los países según el texto que se ingresa en el input de búsqueda
-
 const filterCountries = () => {
   filteredCountries.value = countries.value.filter((country) =>
     country.name.common.toLowerCase().includes(search.value.toLowerCase())
   );
 };
-//* Esta función se encarga de paginar los países, tomando en cuenta la página actual y el número de países por página */
+
 const sliceCountries = (currentCountries: Country[]) => {
   const start = (page.value - 1) * itemsPerPage.value;
   const end = page.value * itemsPerPage.value;
   paginatedCountries.value = currentCountries.slice(start, end);
 };
-// Esta función se encarga de cambiar la página actual, y se llama cuando el usuario hace clic en los botones de paginación
+
 const changePage = (newPage: number) => {
   page.value = newPage;
 };
-//* El onMounted se ejecuta cuando el componente se monta por primera vez, y se encarga de llamar a la función fetchCountries para obtener los países y luego llamar a sliceCountries para paginarlos
+
 onMounted(() => {
   fetchCountries();
   sliceCountries(countries.value);
 });
-//* El watch se encarga de observar los cambios en las variables countries, page y filteredCountries, y actualiza el totalItems y los países paginados cada vez que hay un cambio
+
 watch([countries, page, filteredCountries], () => {
   totalItems.value = countries.value.length;
   sliceCountries(
@@ -63,38 +69,50 @@ watch([countries, page, filteredCountries], () => {
 </script>
 
 <template>
-  <PageHeader />
-  <div class="container max-w-screen-lg mx-auto px-6">
-    <div class="mb-8">
-      <input
-        type="text"
-        placeholder="Search country..."
-        class="border border-gray-300 w-full rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        @input="filterCountries"
-        v-model="search"
-      />
+  <div
+    class="min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors"
+  >
+    <button
+      @click="toggleDark"
+      class="absolute top-5 right-5 px-3 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white dark:bg-yellow-400 dark:text-black dark:hover:bg-yellow-300 text-sm shadow-md hover:scale-105 transition-transform"
+    >
+      {{ isDark ? "☀️ Light" : "🌙 Dark" }}
+    </button>
+
+    <div class="min-h-screen flex flex-col">
+      <PageHeader />
+      <div class="container max-w-screen-lg mx-auto px-6 flex-grow">
+        <div class="mb-8">
+          <input
+            type="text"
+            placeholder="Search country..."
+            class="border border-gray-300 w-full rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+            @input="filterCountries"
+            v-model="search"
+          />
+        </div>
+        <div class="mb-8 text-center">
+          <button
+            @click="() => changePage(page - 1)"
+            :disabled="page <= 1"
+            :class="{ 'opacity-50': page <= 1 }"
+            class="text-red-900 dark:text-red-400 border border-red-900 dark:border-red-400 px-2 py-2 rounded mx-2 hover:bg-red-900 dark:hover:bg-red-400 hover:text-white dark:hover:text-black"
+          >
+            Previous
+          </button>
+          <button
+            @click="() => changePage(page + 1)"
+            :class="{
+              'opacity-50': page >= Math.ceil(totalItems / itemsPerPage),
+            }"
+            :disabled="page >= Math.ceil(totalItems / itemsPerPage)"
+            class="text-blue-900 dark:text-blue-400 border border-blue-900 dark:border-blue-400 px-2 py-2 rounded hover:bg-blue-900 dark:hover:bg-blue-400 hover:text-white dark:hover:text-black"
+          >
+            Next
+          </button>
+        </div>
+        <CountryList :countries="paginatedCountries" />
+      </div>
     </div>
-    <div class="mb-8 text-center">
-      <!--Aquí verificamos si la página actual es menor o igual a 1, si es así, deshabilitamos el botón -->
-      <button
-        @click="() => changePage(page - 1)"
-        :disabled="page <= 1"
-        :class="{ 'opacity-50': page <= 1 }"
-        class="text-red-900 border border-red-900 px-2 py-2 rounded mx-2 hover:bg-red-900 hover:text-white"
-      >
-        Previous
-      </button>
-      <!-- Aquí verificamos si la página actual es mayor o igual al total de páginas, si es así, deshabilitamos el botón -->
-      <button
-        @click="() => changePage(page + 1)"
-        :class="{ 'opacity-50': page >= Math.ceil(totalItems / itemsPerPage) }"
-        :disabled="page >= Math.ceil(totalItems / itemsPerPage)"
-        class="text-blue-900 border border-blue-900 px-2 py-2 rounded hover:bg-blue-900 hover:text-white"
-      >
-        Next
-      </button>
-    </div>
-    <!-- Aquí decimos que si hay países filtrados, se muestren esos, sino se muestren todos los países -->
-    <CountryList :countries="paginatedCountries" />
   </div>
 </template>
